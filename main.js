@@ -42,7 +42,7 @@ app.post('/gate/control', (req, res) => {
   client.publish('gate/control', action);
 
   res.send(`
-    <h1 style="font-size:50px;">Gate ${state}</h1>
+    <h1 style="font-size:50px;">Gate ${action}</h1>
   `);
 });
 
