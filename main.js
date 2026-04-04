@@ -34,7 +34,7 @@ app.post('/gate/control', (req, res) => {
     return res.status(500).send('MQTT not connected');
   }
 
-  if (!["open", "close", "stop"].includes(action)) {
+  if (!["open", "close", "stop", "pcpower"].includes(action)) {
     return res.status(400).send('Invalid action');
   }
 
