@@ -39,8 +39,11 @@ app.post('/gate/control', (req, res) => {
     return res.status(400).send('Invalid action');
   }
 
-  client.publish('esp32/control', action);
-  res.send(`Gate ${action}`);
+  client.publish('gate/control', action);
+
+  res.send(`
+    <h1 style="font-size:50px;">Gate ${state}</h1>
+  `);
 });
 
 //===================================== Start Server =====================================//
