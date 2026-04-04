@@ -15,7 +15,6 @@ const client = mqtt.connect(process.env.MQTT_URL, {
 });
 client.on("connect", () => {
   console.log("MQTT connected");
-  client.publish("gate/control", "open");
 });
 client.on('reconnect', () => {
   console.log('🔄 reconnecting...');
