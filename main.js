@@ -23,12 +23,12 @@ client.on("error", (err) => {
 });
 
 // ✅ HTTP API
-app.get('/on', (req, res) => {
+app.get('/open', (req, res) => {
   client.publish('gate/control', 'open');
   res.send('LED ON');
 });
 
-app.get('/off', (req, res) => {
+app.get('/close', (req, res) => {
   client.publish('gate/control', 'close');
   res.send('LED OFF');
 });
