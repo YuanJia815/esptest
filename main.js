@@ -1,11 +1,20 @@
+import dotenv from 'dotenv'
 import mqtt from 'mqtt'
 import express from 'express'
-import dotenv from 'dotenv'
+import rateLimit from 'express-rate-limit'
 
 dotenv.config()
 
 const app = express()
 app.use(express.json())
+
+//===================================== Rate Limiting =====================================//
+const limiter = rateLimit({
+  windowMs: 2 * 60 * 1000, // 2 minutes
+  max: 25 // limit each IP to 25 requests per windowMs
+})
+app.use(limiter)
+app.use('/gate', limiter)
 
 //===================================== MQTT Setup =====================================//
 const client = mqtt.connect(process.env.MQTT_URL, {
@@ -39,15 +48,15 @@ function authMiddleware(req, res, next) {
 
 //===================================== MQTT Publish Function =====================//
 // ✅ 統一由這裡發送 MQTT（避免重複寫 publish）
-function publishGateCommand(action) {
+function publishGateCommand(action, message) {
   if (!client.connected) {
     throw new Error('MQTT not connected')
   }
 
-  // 🔥 對應 ESP32 topic 分離設計
+  // 🔥 對應 ESP32 topic 分離設計  PARTIAL:
   switch (action) {
     case "open":
-      client.publish("gate/open", "1")
+      client.publish("gate/open", message || "full")
       break
     case "close":
       client.publish("gate/close", "1")
@@ -73,9 +82,9 @@ app.get('/test', (req, res) => {
 // ✅ 改成 RESTful API（更清楚）
 app.post('/gate/:action', authMiddleware, (req, res) => {
   const action = req.params.action.toLowerCase()
-
+  const { message } = req.body;
   try {
-    publishGateCommand(action)
+    publishGateCommand(action, message)
 
     res.send(`
       <h1 style="font-size:50px;">
