@@ -33,6 +33,11 @@ app.post('/gate/control', (req, res) => {
   if (!client.connected) {
     return res.status(500).send('MQTT not connected');
   }
+  const apiKey = req.headers['x-api-key'];
+
+  if (apiKey !== process.env.API_KEY) {
+    return res.status(401).send('Unauthorized');
+  }
 
   if (!["open", "close", "stop", "pcpower"].includes(action)) {
     return res.status(400).send('Invalid action');
