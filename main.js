@@ -87,9 +87,9 @@ app.post('/gate/:action', authMiddleware, (req, res) => {
   const isAccessLocation = new RegExp(config.loc, 'i').test(user.location);
   const isAuthorizedDevice = config.dvc.includes(user.deviceName);
 
-  if (!isAccessLocation || !isAuthorizedDevice) {
-    return res.status(401).send('Unauthorized access')
-  }
+  // if (!isAccessLocation || !isAuthorizedDevice) {
+  //   return res.status(401).send('Unauthorized access')
+  // }
 
   const userInfo = JSON.stringify(user) || "unknown";
   console.log(`🔔 Received command: ${action} from user: ${userInfo}`);
