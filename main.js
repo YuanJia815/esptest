@@ -48,7 +48,7 @@ function authMiddleware(req, res, next) {
 
 //===================================== MQTT Publish Function =====================//
 // ✅ 統一由這裡發送 MQTT（避免重複寫 publish）
-function publishGateCommand(action, message) {
+function publishGateCommand(action, userInfo) {
   if (!client.connected) {
     throw new Error('MQTT not connected')
   }
@@ -56,16 +56,16 @@ function publishGateCommand(action, message) {
   // 🔥 對應 ESP32 topic 分離設計  PARTIAL:
   switch (action) {
     case "open":
-      client.publish("gate/open", message || "full")
+      client.publish("gate/open", userInfo)
       break
     case "close":
-      client.publish("gate/close", "1")
+      client.publish("gate/close", userInfo)
       break
     case "stop":
-      client.publish("gate/stop", "1")
+      client.publish("gate/stop", userInfo)
       break
     case "pcpower":
-      client.publish("pc/power", "1")
+      client.publish("pc/power", userInfo)
       break
     default:
       throw new Error("Invalid action")
@@ -82,9 +82,12 @@ app.get('/test', (req, res) => {
 // ✅ 改成 RESTful API（更清楚）
 app.post('/gate/:action', authMiddleware, (req, res) => {
   const action = req.params.action.toLowerCase()
-  const { message } = req.body;
+  const { user } = req.body;
+  const userInfo = JSON.stringify(user) || "unknown";
+  console.log(`🔔 Received command: ${action} from user: ${userInfo}`);
+
   try {
-    publishGateCommand(action, message)
+    publishGateCommand(action, userInfo)
 
     res.send(`
       <h1 style="font-size:50px;">
