@@ -40,12 +40,11 @@ function authMiddleware(req, res, next) {
   const apiKey = req.headers['x-api-key']
 
   if (apiKey !== process.env.API_KEY) {
-    return res.status(401).send('Unauthorized')
+    return res.status(401).send('Unauthorized access')
   }
 
   next()
 }
-
 //===================================== MQTT Publish Function =====================//
 // ✅ 統一由這裡發送 MQTT（避免重複寫 publish）
 function publishGateCommand(action, userInfo) {
@@ -83,6 +82,15 @@ app.get('/test', (req, res) => {
 app.post('/gate/:action', authMiddleware, (req, res) => {
   const action = req.params.action.toLowerCase()
   const { user } = req.body;
+
+  const config = JSON.parse(process.env.CONFIG);
+  const isAccessLocation = new RegExp(config.loc, 'i').test(user.location);
+  const isAuthorizedDevice = config.dvc.includes(user.deviceName);
+
+  if (!isAccessLocation || !isAuthorizedDevice) {
+    return res.status(401).send('Unauthorized access')
+  }
+
   const userInfo = JSON.stringify(user) || "unknown";
   console.log(`🔔 Received command: ${action} from user: ${userInfo}`);
 
