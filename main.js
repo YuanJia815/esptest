@@ -92,7 +92,7 @@ app.post('/gate/:action', authMiddleware, (req, res) => {
   // }
 
   const userInfo = JSON.stringify(user) || "unknown";
-  console.log(`🔔 Received command: ${action} from user: ${userInfo}`);
+  console.log(`🔔 Received command: ${action} from user: ${user.action}`);
 
   try {
     publishGateCommand(action, userInfo)
